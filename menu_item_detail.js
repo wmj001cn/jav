@@ -3,7 +3,7 @@ catAttr = {'1': {'mytype':type}};
 var defaultk = [
     
     {size:{'大':15, '中':10, '小':8},chillyLevel:2 , sku:'7', desc:'原味螺蛳粉', price:8, unit:'份', qty:0 },
-    {chillyLevel:2 , sku:'16', desc:'炸酱螺蛳粉', price:10, unit:'份', qty:0 },.3  
+    {chillyLevel:2 , sku:'16', desc:'炸酱螺蛳粉', price:10, unit:'份', qty:0 },
     {chillyLevel:2 , sku:'2', desc:'三鲜螺蛳粉', price:10, unit:'份', qty:0 },
     {chillyLevel:2 , sku:'13', desc:'炒螺蛳粉', price:10, unit:'份', qty:0 },
     {chillyLevel:2 , sku:'20', desc:'牛腩螺蛳粉', price:12, unit:'份', qty:0 },
