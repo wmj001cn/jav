@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
+<title>柳州螺蛳粉(潭洲店)</title>
+<link rel="stylesheet" href="js/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="js/font-awesome@4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="main.css"/>
+<style>
+.loader {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999999999;
+	background: url('images/loader.gif') 50% 50% no-repeat rgb(249,249,249);
+}
+</style>
+
+
+
+</head>
+<body>
+
+<div class="loader"></div>
+<script src="js/jquery@3.2.1/dist/jquery.min.js"></script>
+<script type="text/javascript">
+$(window).on('load',function() {
+	$(".loader").fadeOut("slow");
+});
+</script>
+	
+	<div class="container-fluid" id="app">
+		
+		
+		<!--<div class="cate" v-if="showCat">
+				
+    				<ul>
+						<li @click="goCat('c25260843')" :class="{ active: active_el == 'c25260843'}">招牌菜</li>
+    					<li @click="goCat('c1027065')" :class="{ active: active_el == 'c1027065'}">粉面</li>
+						<li @click="goCat('c752084')" :class="{ active: active_el == 'c752084'}">小吃</li>
+    				</ul>
+			
+			</div>-->
+			
+		
+		<div class="top"><div class="container-fluid topbar">
+			<div class="row">
+				
+		
+			
+				<div class="col-3 border-left color-b">
+				    
+					<div @click="showRemark=!showRemark;showCat=false;" class="btn btn color-yellow" style="width: 100%;">备注 <i class="fa fa-envelope-open" aria-hidden="true"></i></div>
+				</div>
+				
+				<div class="col-9 manu border-left color-a out">
+						外卖<input @click="checkNeedShow()" v-model="order.isOut"
+						type="checkbox" /> 
+						<span v-show="order.isOut && useOldDelivery"
+						style="font-size: smaller;">使用最近配送信息<input
+						@click="useOldDelivery=false;isOutShow=true;showCart=false;"
+						v-model="useOldDelivery" type="checkbox" /></span>
+			
+				</div>
+			</div>
+			
+		</div>
+		
+	    </div>
+		<div class="pay container-fluid" style="background-color: white; text-align:center;
+		overflow: auto;">
+			<div v-show="showPayQR" id="wxPayQR">
+
+				<div>
+					<div   v-if="order.isOut ==1 && order.delivery.mobile && order.delivery.address">
+						
+						<div class="delivery"><p>{{order.delivery.mobile.substr(0,3)}}****{{order.delivery.mobile.substr(7)}}</p>
+							<p>{{order.delivery.address}}</p></div>
+						<img src="images/postban.jpg" height="10px" width="100%"/>
+					</div>
+					
+				</div>
+				<table class="table table-fixed">
+						<thead></thead>
+						<tbody>
+							<tr v-for="(item, k) in order.items">
+								<td class="addedCount">{{item.desc}}</td>
+								<td >
+									<div v-show="item.qty>0">
+								<span class="modify" @click="decrease(item, false)">-</span>
+									
+									<i class="modify" style="width:35px;">{{item.qty}}</i>
+									<span class="modify" @click="onTapIncreaseOnly(item, false)">+</span></div>
+								</td>
+	
+								<td >
+									<div v-show="item.packQty>0"><span class="modify" @click="decrease(item, true)">-</span>
+										
+										<i class="modify" style="width:35px;">{{item.packQty}}</i><span class="pack">打包</span>
+										<span class="modify" @click="onTapIncreaseOnly(item, true)">+</span></div>
+								</td>
+	
+	
+								<td class="red">￥{{item.price}}</td>
+								<td><i class="fa fa-times-circle-o red" style="font-size: 1.2em"
+									@click="remove(item.sku)"> </i></td>
+							</tr>
+						</tbody>
+					</table>
+					<i class="dummy">{{dummy}} </i>
+
+					
+					<ul class="pay-detail">
+						<li class="pay-item">
+							<p style="flex: 1;    text-align: left;">订单总价</p>
+							<p class="red">{{sumByKey(order.items)}}</p>
+						</li>
+						<li  class="pay-item" v-show="this.order.isOut && sumByKey(order.items)<=20">
+								<p style="flex: 1;    text-align: left;">配送费</p>
+								<p class="red">+1</p>
+						</li>
+						</ul>
+					
+					
+					<p class="text-right">
+						共需支付 <span class="red">{{this.order.isOut?getTotal(order.items):sumByKey(order.items)}} 元</span>
+						
+					</p>
+					<button v-show="!paySuccess" class="btn btn primary"	style="width: 98%;
+					background-color: #2fb12f;
+					border-radius: 4px!important;" @click="showMyPay=1">微信支付</button>
+			</div>
+		   </div>
+	
+		<div class="middle">
+			<div id="mask" @click="$('#mask').hide();showCart=false;showCat=false;"></div>
+			<div class="content-wrapper">
+				<div class="container-fluid mylist">
+					<div v-for="item in items" class="row product items" v-bind:class="{ active: isActive }">
+						<div class="col-4 " style="padding: 0; margin: 0">
+							<img :src="toUrl(item.sku)" class="product-image" style="width: 115px; height: 100px" alt="暂无图片" />
+							<span class="pack" v-show="item.instore">到店购买</span>
+						</div>
+						<div class="col-5 product-desc">
+							<span>{{item.desc}}</span>
+							<p class="red">￥{{item.price}} / {{item.unit}} </p>
+							<div v-show="item.chillyLevel != undefined">
+									  
+
+									  <button style="font-size: 0.8em!important; padding:0 3px!important;" type="button" 
+									  v-for="(name, key) in ['无', '微', '中', '超辣']" :key="key"
+									  @click="item.chillyLevel = key"
+									  :class="['btn btn-sm', { 'btn-danger': item.chillyLevel == key, 'btn-default': item.chillyLevel != key }]"
+									  >{{ name }} </button>
+							</div>
+						</div>
+						<div class="col-2 control"><button  class="btn btn-circle" style="border-radius: 5px!important;
+    height: 33px;width:38px;text-align:center;padding: 2px;background-color:#fee12d;">{{item.qty}}</button><button v-show="item.packQty>0" class="btn btn-circle" style="border-radius: 5px!important;
+			height: 33px;width:38px;text-align:center;padding: 2px;background-color:rgb(220, 208, 135);">{{item.packQty}}</button></div>
+						<div class="col-1 control">
+								 <span v-if="!item.instore || (item.instore && !order.isOut)" class="btn btn-circle add" @click="onTap(item)"></span>
+								
+
+								 <span  v-show="!order.isOut && tableNumber && !item.instore" class="btn btn-circle" style="font-size: 1em;" @click="onTapIncreaseOnly(item, true)">打包+</span>
+								 
+						</div>
+						<div class="col-1 control">
+							
+							
+				   </div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<transition name="fade">
+		<div class="order-detail" v-show="showCart">
+			<div class="detail">
+				<table class="table table-fixed">
+					<thead></thead>
+					<tbody>
+						<tr v-for="(item, k) in order.items">
+							<td class="addedCount">{{item.desc}}</td>
+							<td >
+								<div v-show="item.qty>=0">
+							<span class="modify" @click="decrease(item, false)">-</span>
+								
+								<i class="modify" style="width:35px;">{{item.qty}}</i>
+								<span class="modify" @click="onTapIncreaseOnly(item, false)">+</span></div>
+							</td>
+
+							<td >
+								<div v-show="item.packQty>0"><span class="modify" @click="decrease(item, true)">-</span>
+									
+									<i class="modify" style="width:35px;">{{item.packQty}}</i><span class="pack">打包</span>
+									<span class="modify" @click="onTapIncreaseOnly(item, true)">+</span></div>
+							</td>
+
+
+							<td class="red">￥{{item.price}}</td>
+							<td><i class="fa fa-times-circle-o red" style="font-size: 1.2em"
+								@click="remove(item.sku)"> </i></td>
+						</tr>
+					</tbody>
+				</table>
+				<i class="dummy">{{dummy}} </i>
+			</div>
+		</div>
+		</transition>
+		<div class="bottom">
+			<div class="container-fluid">
+				 <div class="row">
+					<div class="col">
+						<button class="btn btn-default btn-full-width border-left color-a red">￥{{sumByKey(order.items)}}</button>
+					</div>
+					<div class="col cart">
+						<button class="btn btn-full-width border-left color-b" @click="showMyCart">我拣的菜({{sumByKeyOnly(order.items, 'qty', 'packQty')}})</button>
+					</div>
+					<div class="col">
+							
+						<button class="btn btn-full-width border-left color-a" @click="gotoPay()">
+						
+						
+						去结算
+					
+				
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+			<modal v-if="showModal" @close="showModal = false;">
+		<h5 slot="header">选择需要几个色盅</h5>
+		<template slot="body">
+		<div>
+			<b-form-group label="">
+		    <b-form-radio-group id="radios2" v-model="order.diceCount" name="radioSubComponent">
+		    <b-form-radio
+				value="1">1 人</b-form-radio> <b-form-radio value="2">2 人</b-form-radio>
+			<b-form-radio value="3">3 人</b-form-radio> <b-form-radio value="4">4 人</b-form-radio>
+			<b-form-radio value="5">5 人</b-form-radio> <b-form-radio value="6">6 人</b-form-radio>
+			<b-form-radio value="7">7 人</b-form-radio> <b-form-radio value="8">8 人</b-form-radio>
+			</b-form-radio-group> </b-form-group>
+		</div>
+		</template> </modal>
+		
+		<modal v-if="showMyPay" @close="showMyPay = false;">
+				<h5 slot="header"></h5>
+				<template slot="body">
+				<div>
+						
+		<p class="red">1. 请长按以下二维码, 从弹出的选项中选择 "识别图中二维码", 手动输入金额进行支付<p></p>
+		<img class="file-image payCode"
+			src="images/qr/fwsk_receive_qr.jpg" style="height: 200px; width: 100%; opacity: 1"><br><br>
+	
+
+		<p class="red">2. 支付完成后,请按确认支付以完成下单!<p>
+	    <div v-show="!paySuccess">
+
+				<button class="btn btn-danger btn-sm" @click="showMyPay=0" style="width: 45%">取消支付</button>
+				<button class="btn btn-primary btn-sm" :disabled="paySuccess == 1" @click="submit" style="width: 45%">
+					
+					<span v-show="!receiveClass && !paySuccess" >确认支付</span>
+					<span v-show="receiveClass"> <i class="fa fa-spinner fa-spin fa-small" style="font-size: 24px"> </i>正在提交...
+		
+				</button>
+		</div>
+		
+	
+		
+				</div>
+			
+
+				</template>	<div slot="footer"></div> </modal>
+		
+				
+		
+
+		<modal v-if="isOutShow" @close="isOutShow=false;saveDelivery()">
+			<h5 slot="header">外卖送货详情(订单在20元以下另加1元配送费)</h5>
+			
+			<template slot="body">
+			<div class="container">
+				<div class="row">
+					手机：<input type="text" v-model="order.delivery.mobile">
+				</div>
+				<div class="row">
+					地址：<input type="text" v-model="order.delivery.address">
+				</div>
+			</div>
+			</template> 
+			</modal>
+
+		<modal v-if="showRemark" @close="showRemark=false;">
+		<template slot="body">
+		<div class="container">
+			<div class="row">
+				备注：<textarea type="textarea" v-model="order.remark" rows="4" cols="50"></textarea>
+			</div>
+		</div>
+		</template>
+		</modal>
+		<script type="text/x-template" id="modal-template">
+    <transition name="modal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <slot name="header">
+                        </slot>
+                    </div>
+                    <div class="modal-body">
+                        <slot name="body">
+                        </slot>
+                    </div>
+                    <div class="modal-footer">
+                        <slot name="footer">
+                            <button class="btn btn-primary" @click="$emit('close');">确认</button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+    </script>
+	</div>
+	
+	
+</body>
+<script src="http://yeech.pe.hu/jquery-ui.min.js"></script>
+<script src="http://yeech.pe.hu/flyto.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/vue-select.js"></script>
+<script src="js/bootstrap-vue.min.js"></script>
+<script src="js/vue-toasted.min.js"></script>
+<script src="http://yeech.pe.hu/vue-cookies.min.js"></script>
+
+<script src="menu_item_detail.js"></script>
+<script src="main.js"></script>
+</html>
