@@ -151,6 +151,13 @@ var app = new Vue({
             let val = (value / 1).toFixed(2).replace('.', ',');
             return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
         },
+        swap:function swap(json){
+            var ret = {};
+            for(var key in json){
+              ret[json[key]] = key;
+            }
+            return ret;
+          },
         onTap: function(heitem) {
             var item = $.extend({}, heitem);
 
@@ -164,6 +171,8 @@ var app = new Vue({
 
             if(item.type != undefined) {
                 item.desc = item.desc.replace('粉/面', catAttr[item.cat].mytype[item.type]);
+                me += "-" + item.type;
+                item.sku = me;
             }
 
             if(item.chillyLevel != undefined) {
@@ -171,6 +180,13 @@ var app = new Vue({
                 item.sku = me;
 
                 item.desc += "("+this.chillyMap[item.chillyLevel]+")"
+            }
+
+            if(item.size != undefined) {
+                me += "-" + item.price;
+                item.sku = me;
+                var swap = this.swap(item.size)
+                item.desc += "("+swap[item.price]+")"
             }
              
             if (items && items[me]) {

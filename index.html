@@ -176,6 +176,16 @@ $(window).on('load',function() {
 									>{{ name }} </button>
 						  </div>
 
+						  <div v-show="item.size != undefined">
+									  
+
+							<button style="font-size: 0.8em!important; padding:0 3px!important;" type="button" 
+							v-for="(name, key) in item.size" :key="key"
+							@click="item.price = name"
+							:class="['btn btn-sm', { 'btn-danger': item.price == name, 'btn-default': item.price != name }]"
+							>{{ key }} </button>
+				  </div>
+
 						 
 						<div v-if="item.cat != undefined && catAttr[item.cat] != undefined && catAttr[item.cat].mytype != undefined">
 						<button style="font-size: 0.8em!important; padding:0 3px!important;" type="button" 

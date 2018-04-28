@@ -2,7 +2,7 @@
 catAttr = {'1': {'mytype':type}};
 var defaultk = [
     
-    {chillyLevel:2 , sku:'7', desc:'原味螺蛳粉', price:8, unit:'份', qty:0 },
+    {size:{'大':15, '中':10, '小':8},chillyLevel:2 , sku:'7', desc:'原味螺蛳粉', price:8, unit:'份', qty:0 },
     {chillyLevel:2 , sku:'16', desc:'炸酱螺蛳粉', price:10, unit:'份', qty:0 },  
     {chillyLevel:2 , sku:'2', desc:'三鲜螺蛳粉', price:10, unit:'份', qty:0 },
     {chillyLevel:2 , sku:'13', desc:'炒螺蛳粉', price:10, unit:'份', qty:0 },
@@ -25,7 +25,7 @@ var defaultk = [
     { sku:'17', desc:'煎蛋', price:2, unit:'个', qty:0 },
     { sku:'6', desc:'卤蛋', price:2, unit:'个', qty:0 },     
 
-    { sku:'28', desc:'肉丸', price:2, unit:'份', qty:0 },
+    { sku:'28', desc:'肉丸', price:2, unit:'份', qty:0 , size:{'大':15, '中':10, '小':5}},
     { sku:'33', desc:'花生', price:2, unit:'份', qty:0 },
     { sku:'35', desc:'酸笋', price:3, unit:'份', qty:0 },
     { sku:'40', desc:'鸭脚', price:2, unit:'个', qty:0 },
@@ -57,4 +57,4 @@ var instoreOnly = [
 myall = {
     defaultk:defaultk,
 }
-merchatId='247816947@qq.com';
+merchatId='qmm1969@163.com';
