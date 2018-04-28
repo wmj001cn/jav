@@ -4,10 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
 <title>柳州螺蛳粉(潭洲店)</title>
-<link rel="stylesheet" href="js/bootstrap/dist/css/bootstrap.min.css" />
-<link rel="stylesheet" href="js/font-awesome@4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="http://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="http://unpkg.com/font-awesome@4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="main.css"/>
-<!-- <style>
+<style>
 .loader {
 	position: fixed;
 	left: 0px;
@@ -17,20 +17,20 @@
 	z-index: 9999999999;
 	background: url('images/loader.gif') 50% 50% no-repeat rgb(249,249,249);
 }
-</style> -->
+</style>
 
 
 
 </head>
 <body>
 
-<!-- <div class="loader"></div> -->
-
-<!-- <script type="text/javascript">
+<div class="loader"></div>
+<script src="http://unpkg.com/jquery@3.2.1/dist/jquery.min.js"></script>
+<script type="text/javascript">
 $(window).on('load',function() {
 	$(".loader").fadeOut("slow");
 });
-</script> -->
+</script>
 	
 	<div class="container-fluid" id="app">
 		
@@ -70,24 +70,40 @@ $(window).on('load',function() {
 		</div>
 		
 	    </div>
-		<div class="pay container-fluid" style="background-color: white; text-align:center;
+		<div class="pay container-fluid" v-show="showPayQR" style="background-color: white; text-align:center;
 		overflow: auto;">
 			<div v-show="showPayQR" id="wxPayQR">
 
 				<div>
 					<div   v-if="order.isOut ==1 && order.delivery.mobile && order.delivery.address">
 						
-						<div class="delivery"><p>{{order.delivery.mobile.substr(0,3)}}****{{order.delivery.mobile.substr(7)}}</p>
-							<p>{{order.delivery.address}}</p></div>
+						<div class="delivery container-fluid">
+							<div class="row">
+								<div class="col-9" style="padding: 0 25px;">
+										<p>{{order.delivery.mobile.substr(0,3)}}****{{order.delivery.mobile.substr(7)}}</p>
+										<p>{{order.delivery.address}}</p>
+								</div>
+								<div class="col-3">	<span @click="isOutShow = true" style="font-size: xsmall">修改配送</span></div>
+							</div>
+
+						</div>
+
+						
 						<img src="images/postban.jpg" height="10px" width="100%"/>
 					</div>
 					
 				</div>
-				<table class="table table-fixed">
+				<table class="table table-fixed" style="font-size: 0.8em;">
 						<thead></thead>
 						<tbody>
 							<tr v-for="(item, k) in order.items">
-								<td class="addedCount">{{item.desc}}</td>
+								<td class="addedCount">
+
+										<span v-if="item.type != undefined">{{item.desc.replace('粉/面', catAttr[item.cat].mytype[item.type])}}</span>
+										<span v-else>{{item.desc}}</span>
+									
+									
+									</td>
 								<td >
 									<div v-show="item.qty>0">
 								<span class="modify" @click="decrease(item, false)">-</span>
@@ -111,27 +127,30 @@ $(window).on('load',function() {
 						</tbody>
 					</table>
 					<i class="dummy">{{dummy}} </i>
-
 					
 					<ul class="pay-detail">
 						<li class="pay-item">
 							<p style="flex: 1;    text-align: left;">订单总价</p>
-							<p class="red">{{sumByKey(order.items)}}</p>
+							<p class="red">￥{{sumByKey(order.items)}}</p>
 						</li>
 						<li  class="pay-item" v-show="this.order.isOut && sumByKey(order.items)<=20">
 								<p style="flex: 1;    text-align: left;">配送费</p>
-								<p class="red">+1</p>
+								<p class="red">+￥1</p>
 						</li>
 						</ul>
 					
 					
 					<p class="text-right">
-						共需支付 <span class="red">{{this.order.isOut?getTotal(order.items):sumByKey(order.items)}} 元</span>
+						共需支付 <span class="red">￥{{this.order.isOut?getTotal(order.items):sumByKey(order.items)}} 元</span>
 						
 					</p>
 					<button v-show="!paySuccess" class="btn btn primary"	style="width: 98%;
 					background-color: #2fb12f;
 					border-radius: 4px!important;" @click="showMyPay=1">微信支付</button>
+
+					<!-- <button v-show="!paySuccess" class="btn btn primary"	style="width: 98%;
+					background-color: #2fb12f;
+					border-radius: 4px!important;" @click="showMyPay=0;">继续选菜</button> -->
 			</div>
 		   </div>
 	
@@ -150,12 +169,23 @@ $(window).on('load',function() {
 							<div v-show="item.chillyLevel != undefined">
 									  
 
-									  <button style="font-size: 0.8em!important; padding:0 3px!important;" type="button" 
-									  v-for="(name, key) in ['无', '微', '中', '超辣']" :key="key"
-									  @click="item.chillyLevel = key"
-									  :class="['btn btn-sm', { 'btn-danger': item.chillyLevel == key, 'btn-default': item.chillyLevel != key }]"
-									  >{{ name }} </button>
-							</div>
+									<button style="font-size: 0.8em!important; padding:0 3px!important;" type="button" 
+									v-for="(name, key) in chillyMap" :key="key"
+									@click="item.chillyLevel = key"
+									:class="['btn btn-sm', { 'btn-danger': item.chillyLevel == key, 'btn-default': item.chillyLevel != key }]"
+									>{{ name }} </button>
+						  </div>
+
+						 
+						<div v-if="item.cat != undefined && catAttr[item.cat] != undefined && catAttr[item.cat].mytype != undefined">
+						<button style="font-size: 0.8em!important; padding:0 3px!important;" type="button" 
+						v-for="(name, key) in catAttr[item.cat].mytype" 
+						@click="item.type = key"
+						:class="['btn btn-sm', { 'btn-danger': item.type == key, 'btn-default': item.type != key }]"
+						>{{ name }} </button>
+						</div>
+
+						
 						</div>
 						<div class="col-2 control"><button  class="btn btn-circle" style="border-radius: 5px!important;
     height: 33px;width:38px;text-align:center;padding: 2px;background-color:#fee12d;">{{item.qty}}</button><button v-show="item.packQty>0" class="btn btn-circle" style="border-radius: 5px!important;
@@ -164,7 +194,7 @@ $(window).on('load',function() {
 								 <span v-if="!item.instore || (item.instore && !order.isOut)" class="btn btn-circle add" @click="onTap(item)"></span>
 								
 
-								 <span  v-show="!order.isOut && tableNumber && !item.instore" class="btn btn-circle" style="font-size: 1em;" @click="onTapIncreaseOnly(item, true)">打包+</span>
+								 <!-- <span  v-show="!order.isOut && tableNumber && !item.instore" class="btn btn-circle" style="font-size: 1em;" @click="onTapIncreaseOnly(item, true)">打包+</span> -->
 								 
 						</div>
 						<div class="col-1 control">
@@ -182,7 +212,15 @@ $(window).on('load',function() {
 					<thead></thead>
 					<tbody>
 						<tr v-for="(item, k) in order.items">
-							<td class="addedCount">{{item.desc}}</td>
+							<td class="addedCount">
+								<span v-if="item.type != undefined">{{item.desc.replace('粉/面', catAttr[item.cat].mytype[item.type])}}</span>
+								<span v-else>{{item.desc}}</span>
+
+
+								
+
+
+							</td>
 							<td >
 								<div v-show="item.qty>=0">
 							<span class="modify" @click="decrease(item, false)">-</span>
@@ -200,6 +238,7 @@ $(window).on('load',function() {
 
 
 							<td class="red">￥{{item.price}}</td>
+							
 							<td><i class="fa fa-times-circle-o red" style="font-size: 1.2em"
 								@click="remove(item.sku)"> </i></td>
 						</tr>
@@ -219,7 +258,6 @@ $(window).on('load',function() {
 						<button class="btn btn-full-width border-left color-b" @click="showMyCart">我拣的菜({{sumByKeyOnly(order.items, 'qty', 'packQty')}})</button>
 					</div>
 					<div class="col">
-							
 						<button class="btn btn-full-width border-left color-a" @click="gotoPay()">
 						
 						
@@ -330,14 +368,13 @@ $(window).on('load',function() {
 	
 	
 </body>
-<script src="js/jquery@3.2.1/dist/jquery.min.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<script src="js/flyto.js"></script>
-<script src="js/vue.min.js"></script>
-<script src="js/vue-select.js"></script>
-<script src="js/bootstrap-vue.min.js"></script>
-<script src="js/vue-toasted.min.js"></script>
-<script src="js/vue-cookies.min.js"></script>
+<script src="jquery-ui.min.js"></script>
+<script src="flyto.js"></script>
+<script src="http://unpkg.com/vue/dist/vue.min.js"></script>
+<script src="http://unpkg.com/vue-select@latest"></script>
+<script src="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+<script src="http://unpkg.com/vue-toasted"></script>
+<script src="vue-cookies.min.js"></script>
 
 <script src="menu_item_detail.js"></script>
 <script src="main.js"></script>

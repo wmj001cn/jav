@@ -27,6 +27,7 @@ const VueToast = window.vueToasts ? window.vueToasts.default || window.vueToasts
 var app = new Vue({
     el: '#app',
     data: {
+        chillyMap:['不辣', '微辣', '中辣', '超辣'],
         showRemark: false,
         useOldDelivery: false,
         active_el2: 'tm',
@@ -117,11 +118,16 @@ var app = new Vue({
                 }
                
             }
+
+            this.showCart = false;
+            $('#mask').hide();
+
             this.showPayQR = !this.showPayQR;
             if (this.showPayQR) {
-                this.items = []
+                //this.items = []
             } else {
-                this.goCat('default')
+                //this.goCat('default')
+                $('#mask').hide();
             }
         },
         checkNeedShow: function() {
@@ -145,18 +151,40 @@ var app = new Vue({
             let val = (value / 1).toFixed(2).replace('.', ',');
             return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
         },
-        onTap: function(item) {
+        onTap: function(heitem) {
+            var item = $.extend({}, heitem);
+
             var me = item.sku;
             var self = this;
             var od = self.order;
             var items = od.items;
+
+
+           
+
+            if(item.type != undefined) {
+                item.desc = item.desc.replace('粉/面', catAttr[item.cat].mytype[item.type]);
+            }
+
+            if(item.chillyLevel != undefined) {
+                me += "-" + item.chillyLevel;
+                item.sku = me;
+
+                item.desc += "("+this.chillyMap[item.chillyLevel]+")"
+            }
+             
             if (items && items[me]) {
+                heitem.qty++;
                 items[me][item.pack?'packQty':'qty'] = items[me][item.pack?'packQty':'qty'] + 1
             } else {
+
+               
+                heitem.qty++;
+                
+                console.log(me);
                 this.$set(items, me, item);
 
                 this.$set(items[me], item.pack?'packQty':'qty', 1)
-         
 
                 if(!item.pack){
                     this.$set(items[me], 'packQty', 0);
@@ -164,16 +192,44 @@ var app = new Vue({
                 
             }
         },
-        onTapIncreaseOnly: function(item, pack) {
+        foundItem: function(me){
+            var found = null;
+            for(var i=0; i<this.items.length; i++){
+                var el = this.items[i];
+                console.log(el);
+                if(me.startsWith(el.sku)){
+                    found = el;
+                    break;
+                }
+            }
+
+            return found;
+        },
+        onTapIncreaseOnly: function(heitem, pack) {
+
+            var item = $.extend({}, heitem);
             var me = item.sku;
             var self = this;
             var od = self.order;
             var items = od.items;
 
+
+        
+
+
             var qtyVar = pack?"packQty":'qty';
             if (items && items[me]) {
+               
+
+                var iteml = this.foundItem(me);
+                iteml[qtyVar]++;
+                
+
                 items[me][qtyVar] = items[me][qtyVar] + 1
+                
             } else {
+
+
                 this.$set(items, me, item);
 
                 this.$set(items[me], qtyVar, 1)
@@ -185,8 +241,11 @@ var app = new Vue({
             var od = self.order;
             var items = od.items;
             if (items && items[me]) {
-                var newValue = items[me][pack?"packQty":'qty'] - 1;
+                var qtyVar = pack?"packQty":'qty';
+                var newValue = items[me][qtyVar] - 1;
                 if (newValue >0) {
+                    var iteml = this.foundItem(me);
+                    iteml[qtyVar]--;
                     items[me][pack?"packQty":'qty'] = newValue
                 }
             }
@@ -196,6 +255,9 @@ var app = new Vue({
             var od = self.order;
             var items = od.items;
             if (items && items[me]) {
+                var iteml = this.foundItem(me);
+                iteml.qty -= items[me].qty;
+
                 delete items[me];
                 this.dummy = new Date()
             }
@@ -218,7 +280,7 @@ var app = new Vue({
             this.order['total'] = this.sumByKey(this.items);
             $.ajax({
                 type: 'POST',
-                url: 'https://storelink.000webhostapp.com/test.php',
+                url: 'http://yeech.pe.hu/RealState/index.php/api/submit',
                 data: {
                     'order': this.order
                 },
@@ -282,7 +344,8 @@ var app = new Vue({
             this.showCart = false
         },
         toUrl: function(key) {
-            return "images/menu_item/" + key + ".jpg"
+            var imageKey = key.split('-')[0];
+            return "images/menu_item/" + imageKey + ".jpg"
         },
         
         getTotal:function(object){
@@ -313,6 +376,16 @@ var app = new Vue({
                 }
             }
             return sum
+        },
+
+        getCatAttrById: function(item){
+
+            console.log(catAttr[item.cat]);
+            if(catAttr[item.cat] == undefined){
+                console.log(item.sku);
+                return [];
+            }
+            return catAttr[item.cat].mytype;
         }
     }
 });

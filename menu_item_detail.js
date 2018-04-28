@@ -57,4 +57,4 @@ var instoreOnly = [
 myall = {
     defaultk:defaultk,
 }
-merchatId='qmm1969@163.com';
+merchatId='247816947@qq.com';
