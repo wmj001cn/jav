@@ -280,7 +280,7 @@ var app = new Vue({
             this.order['total'] = this.sumByKey(this.items);
             $.ajax({
                 type: 'POST',
-                url: 'http://yeech.pe.hu/RealState/index.php/api/submit',
+                url: 'https://storelink.000webhostapp.com/test.php',
                 data: {
                     'order': this.order
                 },
