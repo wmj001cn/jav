@@ -106,7 +106,7 @@ public class PHash {
 
 	/**
 	 * 离散余弦变换
-	 * @author luoweifu 
+	 *  
 	 * 
 	 * @param pix
 	 *            原图像的数据矩阵
@@ -138,7 +138,7 @@ public class PHash {
 
 	/**
 	 * 求离散余弦变换的系数矩阵
-	 * @author luoweifu 
+	 *  
 	 * 
 	 * @param n
 	 *            n*n矩阵的大小
@@ -160,7 +160,7 @@ public class PHash {
 
 	/**
 	 * 矩阵转置
-	 * @author luoweifu 
+	 *  
 	 * 
 	 * @param matrix
 	 *            原矩阵
@@ -180,7 +180,7 @@ public class PHash {
 
 	/**
 	 * 矩阵相乘
-	 * @author luoweifu 
+	 *  
 	 * 
 	 * @param A
 	 *            矩阵A
